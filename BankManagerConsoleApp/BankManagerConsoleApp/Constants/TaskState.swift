@@ -8,6 +8,6 @@
 import Foundation
 
 enum TaskState {
-    case start(number: Int)
-    case finish(number: Int)
+    case start(number: Int, task: BankTask)
+    case finish(number: Int, task: BankTask)
 }

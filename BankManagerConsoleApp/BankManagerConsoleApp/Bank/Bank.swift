@@ -48,10 +48,10 @@ final class Bank {
     private func showProcessState() {
         bankManager.updateTaskState = { result in
             switch result {
-            case .start(let num):
-                print(Message.startTask(number: num).showMessage())
-            case .finish(let num):
-                print(Message.finishTask(number: num).showMessage())
+            case .start(let num, let task):
+                print(Message.startTask(number: num, task: task).showMessage())
+            case .finish(let num, let task):
+                print(Message.finishTask(number: num, task: task).showMessage())
             }
         }
     }
@@ -64,6 +64,6 @@ final class Bank {
             let duration: Double = round(totalDuration * 100) / 100
             print(Message.report(count: customerCount, duration: duration).showMessage())
         }
-        open()
+        self.open()
     }
 }
