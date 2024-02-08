@@ -9,23 +9,7 @@ import UIKit
 final class BankViewController: UIViewController {
     
     private let bankViewModel: BankViewModel = BankViewModel(timeHandler: TimerHandler())
-    private var input = BankViewModel.Input()
-    lazy var output = bankViewModel.transform(input: input)
-    
-    // TODO: 데이터 위치 수정 예정
-    private var waitingQueue: [Client] = [
-        Client(number: 1, bankTask: .deposit),
-        Client(number: 2, bankTask: .deposit),
-        Client(number: 3, bankTask: .deposit),
-        Client(number: 4, bankTask: .deposit),
-        Client(number: 5, bankTask: .deposit),
-        Client(number: 6, bankTask: .deposit),
-        Client(number: 7, bankTask: .deposit),
-        Client(number: 8, bankTask: .deposit),
-        Client(number: 9, bankTask: .deposit),
-        Client(number: 10, bankTask: .deposit)
-    ]
-    
+
     private var workingQueue: [Client] = [
         Client(number: 1, bankTask: .loan),
         Client(number: 2, bankTask: .loan),
@@ -122,8 +106,6 @@ final class BankViewController: UIViewController {
         setUpTableView()
         addButtonTarget()
         bind()
-        
-
     }
     
     private func configureUI() {
@@ -169,19 +151,18 @@ final class BankViewController: UIViewController {
     
 
     private func bind() {
-        
-        output.updatedTimerString = { [weak self] in
-            self?.timerLabel.text = $0
+        bankViewModel.waitingClients.subscribe { [weak self] _ in
+            self?.waitingQueueTableView.reloadData()
         }
         
     }
     
     @objc private func addCustomerButtonTapped() {
-        input.addCustomerButtonTapped?()
+        bankViewModel.fetchData()
     }
     
     @objc private func resetButtonTapped() {
-        input.resetButtonTapped?()
+        
     }
 }
 
@@ -199,7 +180,7 @@ extension BankViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         switch tableView {
         case waitingQueueTableView:
-            return waitingQueue.count
+            return bankViewModel.waitingClients.value.count
         case workingQueueTableView:
             return workingQueue.count
         default:
@@ -213,7 +194,7 @@ extension BankViewController: UITableViewDataSource {
         
         switch tableView {
         case waitingQueueTableView:
-            cell.setUpData(data: waitingQueue[indexPath.row])
+            cell.setUpData(data: bankViewModel.waitingClients.value[indexPath.row])
         case workingQueueTableView:
             cell.setUpData(data: workingQueue[indexPath.row])
         default:

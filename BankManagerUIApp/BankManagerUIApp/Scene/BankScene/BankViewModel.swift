@@ -7,31 +7,30 @@
 
 import Foundation
 
-final class BankViewModel: ViewModel {
+class Repository {
     
+    private var waitingQueue: [Client] = []
+    
+    func getData(onCompleted: @escaping (Client) -> Void) {
+        onCompleted(Client(number: 1, bankTask: .loan))
+    }
+}
+
+final class BankViewModel {
+
     let timeHandler: TimerHandler
-    var output = Output()
+    let repository = Repository()
+    
     init(timeHandler: TimerHandler) {
         self.timeHandler = timeHandler
     }
     
-    final class Input {
-        var addCustomerButtonTapped: (()->Void)?
-        var resetButtonTapped: (()->Void)?
-    }
+    var waitingClients: Observable<[Client]> = Observable([])
     
-    final class Output {
-        var updatedTimerString: ((String)->Void)?
-    }
-    
-    func transform(input: Input) -> Output {
-        input.addCustomerButtonTapped = { [weak self] in
-            self?.timeHandler.startTimer()
+    // 레포지토리에서 데이터를 받아오는 메서드
+    func fetchData() {
+        repository.getData { newClient in
+            self.waitingClients.value.append(newClient)
         }
-
-        output.updatedTimerString = (timeHandler.timeString)
-    
-        return output
     }
-
 }
