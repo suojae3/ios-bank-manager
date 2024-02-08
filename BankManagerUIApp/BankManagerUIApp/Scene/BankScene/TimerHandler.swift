@@ -17,7 +17,7 @@ final class TimerHandler {
     
     private var timer = Timer()
     private var count = 0
-    private(set) var timeString = ""
+    private(set) var timeString: ((String)->Void)?
 
     func startTimer() {
         timer = Timer.scheduledTimer(timeInterval: 0.00001, target: self, selector: #selector(timerCounter), userInfo: nil, repeats: true)
@@ -25,14 +25,14 @@ final class TimerHandler {
     
     func stopTimer() {
         timer.invalidate()
-        timeString = "00:00:00"
+        timeString?("00:00:00")
     }
     
     @objc private func timerCounter() {
         count += 1
         let time = secondsToHoursMinutesSeconds(seconds: count)
-        let timeString = makeTimeString(time)
-        self.timeString = timeString
+        var convertedTimeString = makeTimeString(time)
+        timeString?(convertedTimeString)
     }
     
     private func secondsToHoursMinutesSeconds(seconds: Int) -> TimeUnit {

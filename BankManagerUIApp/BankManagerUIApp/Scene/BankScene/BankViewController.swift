@@ -1,12 +1,16 @@
 //
 //  BankManagerUIApp - BankViewController.swift
-//  Created by yagom. 
+//  Created by yagom.
 //  Copyright © yagom academy. All rights reserved.
-// 
+//
 
 import UIKit
 
 final class BankViewController: UIViewController {
+    
+    private let bankViewModel: BankViewModel = BankViewModel(timeHandler: TimerHandler())
+    private var input = BankViewModel.Input()
+    lazy var output = bankViewModel.transform(input: input)
     
     // TODO: 데이터 위치 수정 예정
     private var waitingQueue: [Client] = [
@@ -28,7 +32,7 @@ final class BankViewController: UIViewController {
         Client(number: 3, bankTask: .loan),
         Client(number: 4, bankTask: .loan)
     ]
-
+    
     private let addCustomerButton = UIButton().then {
         $0.setTitle("고객 10명 추가", for: .normal)
         $0.setTitleColor(.systemBlue, for: .normal)
@@ -110,12 +114,16 @@ final class BankViewController: UIViewController {
         $0.alignment = .fill
         $0.translatesAutoresizingMaskIntoConstraints = false
     }
-    
+        
     override func viewDidLoad() {
         super.viewDidLoad()
         
         configureUI()
         setUpTableView()
+        addButtonTarget()
+        bind()
+        
+
     }
     
     private func configureUI() {
@@ -128,7 +136,7 @@ final class BankViewController: UIViewController {
         optionButtonStackView.addArrangedSubviews([addCustomerButton, resetButton])
         greenView.addSubview(waitingQueueTitleLabel)
         purpleView.addSubview(workingQueueTitleLabel)
-
+        
         NSLayoutConstraint.activate([
             entireStackView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             entireStackView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
@@ -152,6 +160,28 @@ final class BankViewController: UIViewController {
             $0.delegate = self
             $0.dataSource = self
         }
+    }
+    
+    private func addButtonTarget() {
+        addCustomerButton.addTarget(self, action: #selector(addCustomerButtonTapped), for: .touchUpInside)
+        resetButton.addTarget(self, action: #selector(resetButtonTapped), for: .touchUpInside)
+    }
+    
+
+    private func bind() {
+        
+        output.updatedTimerString = { [weak self] in
+            self?.timerLabel.text = $0
+        }
+        
+    }
+    
+    @objc private func addCustomerButtonTapped() {
+        input.addCustomerButtonTapped?()
+    }
+    
+    @objc private func resetButtonTapped() {
+        input.resetButtonTapped?()
     }
 }
 
