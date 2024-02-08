@@ -2,35 +2,37 @@
 //  BankViewModel.swift
 //  BankManagerUIApp
 //
-//  Created by ㅣ on 2/8/24.
+//  Created by EUNJU on 2024/02/08.
 //
 
 import Foundation
 
-class Repository {
-    
-    private var waitingQueue: [Client] = []
-    
-    func getData(onCompleted: @escaping (Client) -> Void) {
-        onCompleted(Client(number: 1, bankTask: .loan))
-    }
-}
-
 final class BankViewModel {
 
-    let timeHandler: TimerHandler
-    let repository = Repository()
+    private let repository = BankRepository()
+    private let timer = BankTimer()
     
-    init(timeHandler: TimerHandler) {
-        self.timeHandler = timeHandler
+    private(set) var waitingClients: Observable<[Client]> = Observable([])
+    private(set) var timeString: Observable<String> = Observable("")
+
+    func fetchData() {
+        repository.makeClientData { [weak self] result in
+            self?.waitingClients.value += result
+        }
     }
     
-    var waitingClients: Observable<[Client]> = Observable([])
-    
-    // 레포지토리에서 데이터를 받아오는 메서드
-    func fetchData() {
-        repository.getData { newClient in
-            self.waitingClients.value.append(newClient)
+    func fetchTimeString() {
+        timer.timeString = {
+            self.timeString.value = $0
         }
+    }
+    
+    func start() {
+        timer.start()
+        fetchTimeString()
+    }
+    
+    func stop() {
+        timer.stop()
     }
 }
